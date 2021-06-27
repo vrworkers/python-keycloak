@@ -109,9 +109,9 @@ URL_ADMIN_EVENTS = 'admin/realms/{realm-name}/events'
 
 #Protection API
 
-URL_RESOURCE_ENDPOINT = 'auth/realms/{realm-name}/authz/protection/resource_set'
-URL_RESOURCE_CREATE = 'auth/realms/{realm-name}/authz/protection/resource_set'
-URL_RESOURCE_UPDATE = 'auth/realms/{realm-name}/authz/protection/resource_set/{resource-id}'
+URL_RESOURCE_ENDPOINT = '/realms/{realm-name}/authz/protection/resource_set'
+URL_RESOURCE_CREATE = '/realms/{realm-name}/authz/protection/resource_set'
+URL_RESOURCE_UPDATE = '/realms/{realm-name}/authz/protection/resource_set/{resource-id}'
 URL_RESOURCE_DELETE = 'auth/realms/{realm-name}/authz/protection/resource_set/{resource-id}'
 URL_RESOURCE_READ = 'auth/realms/{realm-name}/authz/protection/resource_set'
 
