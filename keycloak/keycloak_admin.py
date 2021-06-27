@@ -1899,7 +1899,7 @@ class KeycloakAdmin:
         return raise_error_from_response(data_raw , KeycloakGetError)
 
 
-    def get_resource(self,resource_id=None,owner=None,rtype=None,scope=None,**query):
+    def get_resource(self,resource_id=None,owner=None,rtype=None,scope=None,name=None,**query):
         """
         get resource
         
@@ -1909,13 +1909,16 @@ class KeycloakAdmin:
         :param owner: fetch resources owned by owner-id
         :return: HTTP RESPONSE
         """
-        qstring = f"?owner={owner}&type={rtype}&scope={scope}"
+        qstring  = "?"
+        for i,j in dict(owner=owner,type=rtype,scope=scope,name=None).items():
+            if j:
+                qstring = qstring + f"{i}={j}"
         if resource_id:
             URL = URL_RESOURCE_CREATE + "/"+ resource_id
         else :
             URL = URL_RESOURCE_CREATE + qstring
         params_path = {"realm-name":self.realm_name }
-        return self._fetch_all(URL.format(**params_path),query)
+        return self.__fetch_all(URL.format(**params_path),query)
         
     def delete_resource(self, resource_id):
         """
@@ -1929,7 +1932,7 @@ class KeycloakAdmin:
         data_raw = self.raw_delete(URL_RESOURCE_DELETE.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakGetError)
 
-    def update_resource(self,payload):
+    def update_resource(self,resource_id,payload):
         """
         update resource
         
@@ -1945,7 +1948,7 @@ class KeycloakAdmin:
 
 
     def create_permission_ticket(self,payload):
-        URL_CREATE_PERMISSION = "auth/realms/{realm-name}/authz/protection/permission"
+        URL_CREATE_PERMISSION = "realms/{realm-name}/authz/protection/permission"
         """
         create permission ticket
         payload : {  'resource_id' : str , 'resource_scopes' : [] , 'claims' : []  }
@@ -1960,7 +1963,7 @@ class KeycloakAdmin:
     
     def grant_ticket_to_user_on_resource(self,payload):
 
-        URL_TICKET_CREATE = 'auth/realms/{realm-name}/authz/protection/permission/ticket'
+        URL_TICKET_CREATE = 'realms/{realm-name}/authz/protection/permission/ticket'
 
         """
         give permission to user on requested resource
@@ -1974,7 +1977,7 @@ class KeycloakAdmin:
 
     def update_ticket(self,payload):
 
-        URL_TICKET_CREATE = 'auth/realms/{realm-name}/authz/protection/permission/ticket'
+        URL_TICKET_CREATE = 'realms/{realm-name}/authz/protection/permission/ticket'
 
         """
         update_permission_to_ticket_on_resource
@@ -1989,7 +1992,7 @@ class KeycloakAdmin:
     
     def delete_ticket(self, ticket_id):
         
-        URL_TICKET_DELETE = 'auth/realms/{realm-name}/authz/protection/permission/ticket/{ticket-id}'
+        URL_TICKET_DELETE = 'realms/{realm-name}/authz/protection/permission/ticket/{ticket-id}'
         """
         Delete a ticket
 
@@ -2002,7 +2005,7 @@ class KeycloakAdmin:
 
     
     def get_tickets(self,payload,**query):
-        URL_TICKET_GET = "auth/realms/{realm-name}/authz/protection/permission/ticket"
+        URL_TICKET_GET = "realms/{realm-name}/authz/protection/permission/ticket"
         """
         Get Tickets
 
@@ -2016,11 +2019,11 @@ class KeycloakAdmin:
 
         URL = URL_TICKET_GET + qstring
         params_path = {"realm-name": realm_name}
-        return self._fetch_all(URL.format(**params_path),query)  
+        return self.__fetch_all(URL.format(**params_path),query)  
     
     def create_permission_on_resource(self,resource_id,payload):
     
-        URL_ADD_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{resource-id}'
+        URL_ADD_PERMISSION = 'realms/{realm-name}/authz/protection/uma-policy/{resource-id}'
 
         """
         create permission on resource
@@ -2034,7 +2037,7 @@ class KeycloakAdmin:
 
     def update_permission(self,permission_id,payload):
     
-        URL_UPDATE_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
+        URL_UPDATE_PERMISSION = 'realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
 
         """
         create permission on resource
@@ -2049,7 +2052,7 @@ class KeycloakAdmin:
         
     def delete_permission(self,permission_id):
     
-        URL_UPDATE_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
+        URL_UPDATE_PERMISSION = 'realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
 
         """
         delete permission 
@@ -2064,7 +2067,7 @@ class KeycloakAdmin:
     
     def get_permissions_by(self,scope=None,resource_id=None,**query):    
     
-        URL_QUERY_PERMISSIONS = "auth/realms/{realm-name}/authz/protection/uma-policy"
+        URL_QUERY_PERMISSIONS = "realms/{realm-name}/authz/protection/uma-policy"
         """
         get permissions associated witha scope or resource
 
@@ -2076,6 +2079,6 @@ class KeycloakAdmin:
         if resource_id: 
             URL = URL_QUERY_PERMISSIONS + f"?resource={resource_id}"
 
-        params_path = {"realm-name": realm_name }
-        return self._fetch_all(URL.format(**params_path),query)  
+        params_path = {"realm-name": self.realm_name }
+        return self.__fetch_all(URL.format(**params_path),query)  
     
