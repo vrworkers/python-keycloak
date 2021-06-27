@@ -106,3 +106,13 @@ URL_ADMIN_USER_FEDERATED_IDENTITIES = "admin/realms/{realm-name}/users/{id}/fede
 URL_ADMIN_USER_FEDERATED_IDENTITY = "admin/realms/{realm-name}/users/{id}/federated-identity/{provider}"
 
 URL_ADMIN_EVENTS = 'admin/realms/{realm-name}/events'
+
+#Protection API
+
+URL_RESOURCE_ENDPOINT = 'auth/realms/{realm-name}/authz/protection/resource_set'
+URL_RESOURCE_CREATE = 'auth/realms/{realm-name}/authz/protection/resource_set'
+URL_RESOURCE_UPDATE = 'auth/realms/{realm-name}/authz/protection/resource_set/{resource-id}'
+URL_RESOURCE_DELETE = 'auth/realms/{realm-name}/authz/protection/resource_set/{resource-id}'
+URL_RESOURCE_READ = 'auth/realms/{realm-name}/authz/protection/resource_set'
+
+URL_PERMISSION_ENDPOINT = "auth/realms/{realm_name}/authz/protection/permission"

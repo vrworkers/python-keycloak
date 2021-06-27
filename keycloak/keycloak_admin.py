@@ -47,7 +47,8 @@ from .urls_patterns import URL_ADMIN_SERVER_INFO, URL_ADMIN_CLIENT_AUTHZ_RESOURC
     URL_ADMIN_REALM_ROLES_MEMBERS, URL_ADMIN_CLIENT_PROTOCOL_MAPPER, URL_ADMIN_CLIENT_SCOPES_MAPPERS, \
     URL_ADMIN_FLOWS_EXECUTIONS_EXEUCUTION, URL_ADMIN_FLOWS_EXECUTIONS_FLOW, URL_ADMIN_FLOWS_COPY, \
     URL_ADMIN_FLOWS_ALIAS, URL_ADMIN_CLIENT_SERVICE_ACCOUNT_USER, URL_ADMIN_AUTHENTICATOR_CONFIG, \
-    URL_ADMIN_CLIENT_ROLES_COMPOSITE_CLIENT_ROLE, URL_ADMIN_CLIENT_ALL_SESSIONS, URL_ADMIN_EVENTS
+    URL_ADMIN_CLIENT_ROLES_COMPOSITE_CLIENT_ROLE, URL_ADMIN_CLIENT_ALL_SESSIONS, URL_ADMIN_EVENTS, \
+    URL_RESOURCE_CREATE,URL_RESOURCE_READ,URL_RESOURCE_UPDATE,URL_RESOURCE_DELETE
 
 
 class KeycloakAdmin:
@@ -1774,6 +1775,9 @@ class KeycloakAdmin:
                                 data=None, **query)
         return raise_error_from_response(data_raw, KeycloakGetError)
 
+
+    
+
     def raw_get(self, *args, **kwargs):
         """
         Calls connection.raw_get.
@@ -1878,3 +1882,200 @@ class KeycloakAdmin:
         params_path = {"realm-name": self.realm_name, "id": client_id}
         data_raw = self.connection.raw_get(URL_ADMIN_CLIENT_ALL_SESSIONS.format(**params_path))
         return raise_error_from_response(data_raw, KeycloakGetError)
+
+
+    def create_resource(self,payload):
+        """
+        create resource
+        
+        :param payload: ResourceRepresentation
+        https://www.keycloak.org/docs-api/14.0/rest-api/index.html#_resourcerepresentation
+
+        :return: HTTP RESPONSE
+        """
+        params_path = {"realm-name":self.realm_name }
+        data_raw = self.connection.raw_post(URL_RESOURCE_CREATE.format(**params_path),
+                                data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+
+    def get_resource(self,resource_id=None,owner=None,rtype=None,scope=None,**query):
+        """
+        get resource
+        
+        :param resource_id: fetch by resource id
+        :param type: fetch by type of resource
+        :param scope: fetch by scope assigned
+        :param owner: fetch resources owned by owner-id
+        :return: HTTP RESPONSE
+        """
+        qstring = f"?owner={owner}&type={rtype}&scope={scope}"
+        if resource_id:
+            URL = URL_RESOURCE_CREATE + "/"+ resource_id
+        else :
+            URL = URL_RESOURCE_CREATE + qstring
+        params_path = {"realm-name":self.realm_name }
+        return self._fetch_all(URL.format(**params_path),query)
+        
+    def delete_resource(self, resource_id):
+        """
+        Delete a resource
+
+        :param resource_id: resource id
+        :return: Http response
+        """
+
+        params_path = {"realm-name": realm_name,"resource-id":resource_id}
+        data_raw = self.raw_delete(URL_RESOURCE_DELETE.format(**params_path))
+        return raise_error_from_response(data_raw, KeycloakGetError)
+
+    def update_resource(self,payload):
+        """
+        update resource
+        
+        :param payload: ResourceRepresentation
+        https://www.keycloak.org/docs-api/14.0/rest-api/index.html#_resourcerepresentation
+
+        :return: HTTP RESPONSE
+        """
+        params_path = {"realm-name":self.realm_name ,"resource-id":resource_id}
+        data_raw = self.connection.raw_put(URL_RESOURCE_UPDATE.format(**params_path),
+                                data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+
+    def create_permission_ticket(self,payload):
+        URL_CREATE_PERMISSION = "auth/realms/{realm-name}/authz/protection/permission"
+        """
+        create permission ticket
+        payload : {  'resource_id' : str , 'resource_scopes' : [] , 'claims' : []  }
+
+        :return: HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name}
+        data_raw = self.connection.raw_post(URL_CREATE_PERMISSION.format(**params_path),
+                                    data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+    
+    def grant_ticket_to_user_on_resource(self,payload):
+
+        URL_TICKET_CREATE = 'auth/realms/{realm-name}/authz/protection/permission/ticket'
+
+        """
+        give permission to user on requested resource
+        payload : {  'resource' : 'resource-id' , 'requester' : 'user_id' , 'granted' : true , 'scopeName' : true  }
+        :return HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name}
+        data_raw = self.connection.raw_post(URL_TICKET_CREATE.format(**params_path),
+                                    data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+    def update_ticket(self,payload):
+
+        URL_TICKET_CREATE = 'auth/realms/{realm-name}/authz/protection/permission/ticket'
+
+        """
+        update_permission_to_ticket_on_resource
+        payload : {  'id':'ticket-id' ,'resource' : 'resource-id' , 'requester' : 'user_id' , 'granted' : true , 'scopeName' : true  }
+        :return HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name}
+        data_raw = self.connection.raw_put(URL_TICKET_CREATE.format(**params_path),
+                                    data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+    
+    def delete_ticket(self, ticket_id):
+        
+        URL_TICKET_DELETE = 'auth/realms/{realm-name}/authz/protection/permission/ticket/{ticket-id}'
+        """
+        Delete a ticket
+
+        :param ticket_id: ticket id
+        :return: Http response
+        """
+        params_path = {"realm-name": realm_name,"ticket-id": ticket_id}
+        data_raw = self.raw_delete(URL_TICKET_DELETE.format(**params_path))
+        return raise_error_from_response(data_raw, KeycloakGetError)
+
+    
+    def get_tickets(self,payload,**query):
+        URL_TICKET_GET = "auth/realms/{realm-name}/authz/protection/permission/ticket"
+        """
+        Get Tickets
+
+        query params : scopeId , resourceId , owner ,  requester ,  granted ,  returnNames, first, max
+        :return: Http response
+        """
+        qstring = "?"
+        for param,value in payload.items():
+            if value :
+                qstring = qstring + f"{param}={value}&"
+
+        URL = URL_TICKET_GET + qstring
+        params_path = {"realm-name": realm_name}
+        return self._fetch_all(URL.format(**params_path),query)  
+    
+    def create_permission_on_resource(self,resource_id,payload):
+    
+        URL_ADD_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{resource-id}'
+
+        """
+        create permission on resource
+        payload : {  name : str , description : str , scopes:[],groups:[] , roles : [] , clients : [] }
+        :return HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name,"resource-id":resource_id}
+        data_raw = self.connection.raw_post(URL_ADD_PERMISSION.format(**params_path),
+                                    data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+    def update_permission(self,permission_id,payload):
+    
+        URL_UPDATE_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
+
+        """
+        create permission on resource
+        payload : { id :  str , name : str , description : str ,type: str, logic : str , decisionStrategy : str,
+             scopes:[],groups:[] , roles : [] , clients : [] }
+        :return HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name,"permission-id":permission_id}
+        data_raw = self.connection.raw_put(URL_UPDATE_PERMISSION.format(**params_path),
+                                    data=json.dumps(payload))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+        
+    def delete_permission(self,permission_id):
+    
+        URL_UPDATE_PERMISSION = 'auth/realms/{realm-name}/authz/protection/uma-policy/{permission-id}'
+
+        """
+        delete permission 
+        :permission_id:
+        
+        :return HTTP RESPONSE
+        """
+        params_path = {"realm-name" : self.realm_name,"permission-id":permission_id}
+        data_raw = self.connection.raw_delete(URL_UPDATE_PERMISSION.format(**params_path))
+        return raise_error_from_response(data_raw , KeycloakGetError)
+
+    
+    def get_permissions_by(self,scope=None,resource_id=None,**query):    
+    
+        URL_QUERY_PERMISSIONS = "auth/realms/{realm-name}/authz/protection/uma-policy"
+        """
+        get permissions associated witha scope or resource
+
+        :return: HTTP RESPONSE
+        """
+        URL = URL_QUERY_PERMISSIONS
+        if scope:
+            URL = URL_QUERY_PERMISSIONS + f"?scope={scope}"
+        if resource_id: 
+            URL = URL_QUERY_PERMISSIONS + f"?resource={resource_id}"
+
+        params_path = {"realm-name": realm_name }
+        return self._fetch_all(URL.format(**params_path),query)  
+    
